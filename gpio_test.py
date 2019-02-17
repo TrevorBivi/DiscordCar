@@ -56,7 +56,7 @@ async def stop(ctx, *args):
 
 @bot.command()
 async def end(ctx, *args):
-    PWM.stop()
+    #PWM.stop()
     gpio.cleanup()
     msg = await ctx.send("gpio stopped hopefully")
     await ctx.send(msg.channel.id)
