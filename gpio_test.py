@@ -55,16 +55,16 @@ async def img_spam():
     print('background process started')
     while bot.ws is None: #wait until ws connection is made (there is a short period of time after bot.run is called during which the event loop has started but a discord websocket hasn't been established)
         await asyncio.sleep(1)
-    await bot.wait_until_ready()
-    await asyncio.sleep(10)
-    img_channel = bot.get_channel(546361003701436426) 
+    await bot.wait_until_ready() #MIGHT ACTUALLY DO THE SAME THING AS THE ABOVE LINES BUT WHATEVER
+    img_channel = bot.get_channel(546361003701436426)
     print(img_channel)
-    img_msg = None
+    old_img_msg = None
     while True:
         img_name = take_pic()
-        if (img_msg is not None):
-            img_msg.delete()
         img_msg = await img_channel.send(file = discord.File(img_name, filename=img_name))
+        if (old_img_msg is not None):
+            await old_img_msg.delete()
+        old_img_msg = img_msg
         await asyncio.sleep(1)
 bot.loop.create_task(img_spam())
 
