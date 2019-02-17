@@ -6,24 +6,33 @@ import discord
 import asyncio
 
 
-class PwmWad:
+class PwmWheels:
 
     def __init__(self, pins, freq = 100):
         gpio.setup(pins, gpio.OUT)
-        self._pwms = [gpio.PWM(p, freq) for p in pins] #create all the pwms, make them all the same frequency
-        for pwm in self._pwms:
-            pwm.start(0) #start each pwm at 0 duty
+        self._r_pwm = gpio.PWM(pins[0], freq)
+        self._l_pwm = gpio.PWM(pins[1], freq)
+        self._r_pwm.start(0)
+        self._l_pwm.start(0)
     
-    def change_duty(self, new_duty):
-        for pwm in self._pwms:
-            pwm.ChangeDutyCycle(new_duty)
+    def forward(self):
+        self._r_pwm.ChangeDutyCycle(50)
+        self._l_pwm.ChangeDutyCycle(5)
+
+    def back(self):
+        self._r_pwm.ChangeDutyCycle(5)
+        self._l_pwm.ChangeDutyCycle(50)
+
+    def stop(self):
+        self._r_pwm.ChangeDutyCycle(0)
+        self._l_pwm.ChangeDutyCycle(0)
 
 
 bot = commands.Bot(command_prefix = "!", case_insensitive = False)
 
 gpio.setmode(gpio.BOARD) #use BOARD pin numbering
-OUT_PINS = (19, 21, 23, 24)
-PWM = PwmWad(OUT_PINS)
+OUT_PINS = (21, 23)
+WHEELS = PwmWheels(OUT_PINS)
 
 cam = PiCamera()
 cam.start_preview()
@@ -32,17 +41,17 @@ time.sleep(2) #HAVE TO SLEEP FOR 2 SECS TO LET THE CAMERA "WARM UP" (yeah I know
 
 @bot.command()
 async def forward(ctx, *args):
-    PWM.change_duty(50)
+    WHEELS.forward()
     await ctx.send("going forward hopefully")
 
 @bot.command()
-async def backward(ctx, *args):
-    PWM.change_duty(5)
+async def back(ctx, *args):
+    WHEELS.back()
     await ctx.send("going backwards hopefully")
 
 @bot.command()
 async def stop(ctx, *args):
-    PWM.change_duty(0)
+    WHEELS.stop()
     await ctx.send("not moving hopefully")
 
 @bot.command()
